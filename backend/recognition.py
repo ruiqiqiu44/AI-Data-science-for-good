@@ -204,7 +204,9 @@ def _align(expected: list[str], actual: list[str]) -> list[tuple[str | None, str
 # ── Feedback engine ────────────────────────────────────────────────────────────
 
 class Feedback:
-    def __init__(self) -> None:
+    def __init__(self, expected: str = "", actual: str = "") -> None:
+        self.expected = expected
+        self.actual = actual
         self.high: list[tuple[str, str, str]] = []  # (label, example, tip)
         self.low:  list[str] = []
         self._seen: set[tuple[str, str]] = set()
@@ -226,12 +228,14 @@ class Feedback:
 
     def to_dict(self) -> dict:
         return {
+            "expected": self.expected,
+            "actual": self.actual,
             "score": self.score,
             "errors": [
-                {"label": label}
+                {"label": label, "examples": example, "tip": tip}
                 for label, example, tip in self.high
             ],
-            
+            "minor_notes": self.low
         }
 
 
@@ -239,7 +243,7 @@ def analyse(expected_str: str, actual_str: str) -> Feedback:
     exp = _tokenise(expected_str)
     act = _tokenise(actual_str)
     alignment = _align(exp, act)
-    fb = Feedback()
+    fb = Feedback(expected=expected_str, actual=actual_str)
 
     for i, (e, a) in enumerate(alignment):
         # ── Substitutions ──────────────────────────────────────────────────

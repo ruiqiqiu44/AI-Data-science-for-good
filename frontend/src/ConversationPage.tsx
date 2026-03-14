@@ -6,11 +6,11 @@ import { BACKEND_URL } from './config'
 // ---------------------------------------------------------------------------
 // Send recorded audio to backend API for processing
 // ---------------------------------------------------------------------------
-async function sendRecordedAudio(audio: Blob) {
+async function sendRecordedAudio(audio: Blob, fileName: string) {
   try {
     // Create FormData to send the audio blob
     const formData = new FormData()
-    formData.append('audio', audio, 'recording.wav')
+    formData.append('audio', audio, fileName)
 
     // TODO: Replace with your actual API endpoint
     const response = await fetch(`${BACKEND_URL}/process-audio`, {
@@ -97,8 +97,11 @@ export default function ConversationPage() {
     }
 
     recorder.onstop = () => {
-      const audio = new Blob(chunksRef.current, { type: recorder.mimeType })
-      sendRecordedAudio(audio)
+      const mimeType = recorder.mimeType;
+      const audio = new Blob(chunksRef.current, { type: mimeType });
+      const fileExtension = mimeType.split(';')[0].split('/')[1] || 'audio';
+      const fileName = `recording.${fileExtension}`;
+      sendRecordedAudio(audio, fileName);
       stream.getTracks().forEach((t) => t.stop())
     }
 

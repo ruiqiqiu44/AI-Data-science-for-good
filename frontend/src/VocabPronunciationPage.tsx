@@ -6,10 +6,10 @@ import { BACKEND_URL } from './config'
 // ---------------------------------------------------------------------------
 // API call — receives the target word and the recorded attempt, returns feedback
 // ---------------------------------------------------------------------------
-async function getPronunciationFeedback(word: string, audio: Blob): Promise<void> {
+async function getPronunciationFeedback(word: string, audio: Blob, fileName: string): Promise<void> {
   const body = new FormData()
   body.append('target', word)
-  body.append('audio', audio, 'recording.webm')
+  body.append('audio', audio, fileName)
 
   const response = await fetch(`${BACKEND_URL}/recog/`, {
     method: 'POST',
@@ -79,8 +79,11 @@ export default function VocabPronunciationPage() {
     }
 
     recorder.onstop = () => {
-      const audio = new Blob(chunksRef.current, { type: recorder.mimeType })
-      getPronunciationFeedback(currentWord, audio)
+      const mimeType = recorder.mimeType;
+      const audio = new Blob(chunksRef.current, { type: mimeType });
+      const fileExtension = mimeType.split(';')[0].split('/')[1] || 'audio';
+      const fileName = `recording.${fileExtension}`;
+      getPronunciationFeedback(currentWord, audio, fileName);
       stream.getTracks().forEach((t) => t.stop())
     }
 

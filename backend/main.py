@@ -1,10 +1,12 @@
+import io
+import torchaudio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from tts import text_to_speech
 from pronunciation import get_feedback
-from recognition import load_model, audio_bytes_to_numpy, audio_to_phonemes, expected_phonemes, analyse
+from recognition import load_model, audio_to_phonemes, expected_phonemes, analyse
 from images import get_images
 
 _processor = None
@@ -59,7 +61,16 @@ async def recog(audio: UploadFile, target: str = Form(...)):
 }'''
     data = await audio.read()
     try:
-        audio_array = audio_bytes_to_numpy(data)
+        # Decode audio bytes → waveform tensor using torchaudio (handles WebM/Opus)
+        waveform, sample_rate = torchaudio.load(io.BytesIO(data))
+        
+        # Resample to 16 kHz (required by wav2vec2)
+        if sample_rate != 16000:
+            resampler = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=16000)
+            waveform = resampler(waveform)
+        
+        # Collapse to mono float32 numpy array
+        audio_array = waveform.mean(dim=0).numpy()
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Could not decode audio: {exc}")
 
@@ -70,8 +81,5 @@ async def recog(audio: UploadFile, target: str = Form(...)):
     actual_str = audio_to_phonemes(audio_array, _processor, _model)
     fb = analyse(ref_str, actual_str)
 
-    return {
-
-        **fb.to_dict(),
-    }
+    return fb.to_dict()
 
