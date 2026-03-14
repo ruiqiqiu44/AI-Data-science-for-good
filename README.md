@@ -108,10 +108,3 @@ API runs at `http://localhost:8000`. Interactive docs at `http://localhost:8000/
 
 ### Scan Words from Image
 Upload a photo of a sign, notice, or form — the app extracts words, shows emoji + meaning, and can pronounce them.
-
-**Usage**
-Tap the photo area to select an image.
-Wait for scanning progress.
-View extracted words with emoji and meaning.
-Click the 🔊 button to hear the word.
-Reset to upload a new photo.
