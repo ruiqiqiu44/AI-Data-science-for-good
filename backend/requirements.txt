@@ -15,8 +15,8 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 torch
 transformers
-sounddevice
+soundfile
 scipy
 numpy
 phonemizer
-pyttsx3
+python-multipart

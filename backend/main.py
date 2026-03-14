@@ -58,7 +58,6 @@ async def recog(audio: UploadFile, target: str = Form(...)):
     fb = analyse(ref_str, actual_str)
 
     return {
-        "expected": ref_str,
-        "actual": actual_str,
+
         **fb.to_dict(),
     }

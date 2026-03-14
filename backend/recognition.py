@@ -228,10 +228,10 @@ class Feedback:
         return {
             "score": self.score,
             "errors": [
-                {"label": label, "examples": example, "tip": tip}
+                {"label": label}
                 for label, example, tip in self.high
             ],
-            "minor_notes": self.low,
+            
         }
 
 
