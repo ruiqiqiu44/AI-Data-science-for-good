@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Left bubble -->
+  <rect x="2" y="4" width="38" height="26" rx="8" fill="#34d399"/>
+  <path d="M10 30 L6 42 L22 30" fill="#34d399"/>
+  <!-- Right bubble -->
+  <rect x="24" y="34" width="38" height="26" rx="8" fill="#a78bfa"/>
+  <path d="M54 60 L58 72 L42 60" fill="#a78bfa"/>
+</svg>

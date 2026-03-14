@@ -4,8 +4,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import ScenarioPage from './ScenarioPage.tsx'
-import VocabularyPage from './VocabularyPage.tsx'
+import VocabPronunciationPage from './VocabPronunciationPage.tsx'
 import ConversationPage from './ConversationPage.tsx'
+import ScanPage from './ScanPage.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -13,8 +14,9 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/scenario/:scenarioId" element={<ScenarioPage />} />
-        <Route path="/scenario/:scenarioId/vocabulary" element={<VocabularyPage />} />
+        <Route path="/scenario/:scenarioId/vocab-pronunciation" element={<VocabPronunciationPage />} />
         <Route path="/scenario/:scenarioId/conversation" element={<ConversationPage />} />
+        <Route path="/scan" element={<ScanPage />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
