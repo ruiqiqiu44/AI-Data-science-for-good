@@ -160,7 +160,7 @@ function App() {
           fontSize: 16, fontWeight: 800, cursor: 'pointer',
         }}
       >
-        📄 Scan a Letter
+        📷 Scan a Photo
       </button>
 
 
