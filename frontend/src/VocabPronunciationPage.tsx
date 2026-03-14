@@ -1,6 +1,23 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './VocabPronunciationPage.css'
+
+// ---------------------------------------------------------------------------
+// API call — receives the target word and the recorded attempt, returns feedback
+// ---------------------------------------------------------------------------
+async function getPronunciationFeedback(word: string, audio: Blob): Promise<void> {
+  const body = new FormData()
+  body.append('word', word)
+  body.append('audio', audio, 'recording.webm')
+
+  const response = await fetch('http://localhost:8000/pronunciation-feedback', {
+    method: 'POST',
+    body,
+  })
+
+  await response.json()  // TODO: handle feedback response
+}
+// ---------------------------------------------------------------------------
 
 function speakWord(word: string) {
   if (!window.speechSynthesis) return
@@ -150,9 +167,39 @@ export default function VocabPronunciationPage() {
   const { scenarioId } = useParams<{ scenarioId: string }>()
   const navigate = useNavigate()
   const [index, setIndex] = useState(0)
+  const [recording, setRecording] = useState(false)
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const chunksRef = useRef<Blob[]>([])
 
   const items = VOCAB_DATA[scenarioId ?? ''] ?? []
   const current = items[index]
+
+  async function startRecording() {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    const recorder = new MediaRecorder(stream)
+    chunksRef.current = []
+
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunksRef.current.push(e.data)
+    }
+
+    recorder.onstop = () => {
+      const audio = new Blob(chunksRef.current, { type: recorder.mimeType })
+      getPronunciationFeedback(current.word, audio)
+      stream.getTracks().forEach((t) => t.stop())
+    }
+
+    recorder.start()
+    mediaRecorderRef.current = recorder
+    setRecording(true)
+  }
+
+  function stopRecording() {
+    mediaRecorderRef.current?.stop()
+    mediaRecorderRef.current = null
+    setRecording(false)
+  }
 
   return (
     <div className="vocab-page">
@@ -162,14 +209,24 @@ export default function VocabPronunciationPage() {
 
       {current ? (
         <>
-          <button
-            className="vocab-word-btn"
-            onClick={() => speakWord(current.word)}
-            aria-label={`Hear pronunciation of ${current.word}`}
-          >
-            <span className="vocab-word">{current.word}</span>
-            <span className="vocab-speaker">🔊</span>
-          </button>
+          <div className="vocab-word-row">
+            <button
+              className="vocab-word-btn"
+              onClick={() => speakWord(current.word)}
+              aria-label={`Hear pronunciation of ${current.word}`}
+            >
+              <span className="vocab-word">{current.word}</span>
+              <span className="vocab-speaker">🔊</span>
+            </button>
+
+            <button
+              className={`vocab-record-btn${recording ? ' vocab-record-btn--active' : ''}`}
+              onClick={recording ? stopRecording : startRecording}
+              aria-label={recording ? 'Stop recording' : 'Record your pronunciation'}
+            >
+              {recording ? '⏹' : '🎙'}
+            </button>
+          </div>
 
           <div className="vocab-image-grid">
             {current.images.map((url, i) => (
