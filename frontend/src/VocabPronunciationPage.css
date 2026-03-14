@@ -33,6 +33,47 @@
   border-color: #94a3b8;
 }
 
+/* Word + record row */
+.vocab-word-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Record button */
+@keyframes record-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(239, 68, 68, 0.5); }
+  70%  { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0   rgba(239, 68, 68, 0); }
+}
+
+.vocab-record-btn {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  font-size: clamp(2rem, 5vw, 3rem);
+  background: white;
+  border: 2.5px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.vocab-record-btn:hover {
+  border-color: #ef4444;
+}
+
+.vocab-record-btn--active {
+  background: #fef2f2;
+  border-color: #ef4444;
+  animation: record-pulse 1s ease-out infinite;
+}
+
 /* Word button */
 @keyframes float-glow {
   0%   { transform: translateY(0px);   box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3); }
@@ -79,7 +120,7 @@
 }
 
 .vocab-speaker {
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-size: clamp(2rem, 5vw, 3rem);
   line-height: 1;
 }
 

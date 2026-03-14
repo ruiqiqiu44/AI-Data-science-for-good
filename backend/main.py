@@ -1,4 +1,4 @@
-from fastapi import FastAPI 
+from fastapi import FastAPI, UploadFile, File, Form 
 from fastapi.middleware.cors import CORSMiddleware
 from tts import text_to_speech
 
