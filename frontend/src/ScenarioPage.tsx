@@ -109,7 +109,7 @@ export default function ScenarioPage() {
             stopAudio();
             navigate(`/scenario/${scenarioId}/vocab-pronunciation`);
           }}
-          onMouseEnter={() => playAudio('/audio/vocabulary and pronunciation.wav')}
+          onMouseEnter={() => playAudio('/audio/vocabulary_and_pronunciation.wav')}
           onMouseLeave={stopAudio}
         >
           <div className="mode-illustration">
