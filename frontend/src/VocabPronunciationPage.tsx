@@ -15,7 +15,8 @@ async function getPronunciationFeedback(word: string, audio: Blob): Promise<void
     body,
   })
 
-  await response.json()  // TODO: handle feedback response
+  const feedback = await response.json()
+  console.log('Pronunciation feedback:', feedback)
 }
 // ---------------------------------------------------------------------------
 
