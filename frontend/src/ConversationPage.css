@@ -5,7 +5,7 @@
   width: 100%;
   overflow: hidden;
   align-self: stretch;
-  background-color: #f5f0eb;
+  background-color: #fffbeb;
 }
 
 .convo-back-btn {
@@ -31,13 +31,12 @@
   border-color: #94a3b8;
 }
 
-/* Two-column split */
 .convo-split {
   flex: 1;
   display: flex;
   min-height: 0;
-  padding: 0 1.25rem 1.25rem;
-  gap: 1.25rem;
+  padding: 0 2rem 2rem;
+  gap: 2rem;
 }
 
 .convo-side {
@@ -45,94 +44,91 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 0;
 }
 
 .convo-divider {
   width: 2px;
-  background: #e2e8f0;
+  background: #fde68a;
   align-self: stretch;
-  margin: 0 0 1.25rem;
+  margin: 0 0 2rem;
 }
 
-/* Rounded rectangle card inside each half */
 .convo-card {
-  width: 88%;
-  height: 88%;
-  border-radius: 32px;
+  width: 95%;
+  height: 95%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1.5rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .convo-card--ai {
-  background: linear-gradient(160deg, #f5f3ff 0%, #ede9fe 100%);
-  border: 2.5px solid #ddd6fe;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .convo-card--human {
-  background: linear-gradient(160deg, #fffbeb 0%, #fef3c7 100%);
-  border: 2.5px solid #fde68a;
+  all: unset;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  width: 95%;
+  height: 95%;
+  background: transparent;
+  border: none;
+  transition: transform 0.2s;
 }
 
 .convo-card--human:hover {
-  border-color: #f59e0b;
-  box-shadow: 0 6px 32px rgba(245, 158, 11, 0.18);
-}
-
-.convo-card--recording {
-  border-color: #ef4444 !important;
-  box-shadow: 0 6px 32px rgba(239, 68, 68, 0.2) !important;
+  transform: scale(1.02);
 }
 
 .convo-card--recording .convo-side-label {
-  color: #ef4444;
+  color: #ef4444 !important;
 }
 
 .convo-side-label {
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #b45309;
 }
 
-/* Circle */
 .convo-circle-wrap {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 220px;
-  height: 220px;
+  width: 320px;
+  height: 320px;
 }
 
 .convo-circle {
-  all: unset;
-  cursor: pointer;
   position: relative;
   z-index: 2;
-  width: 200px;
-  height: 200px;
+  width: 300px;
+  height: 300px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .convo-circle svg {
-  width: 110px;
-  height: 110px;
-}
-
-.convo-circle--ai {
-  background: #7c3aed;
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.25);
+  width: 165px;
+  height: 165px;
 }
 
 .convo-circle--human {
@@ -140,7 +136,6 @@
   box-shadow: 0 8px 32px rgba(245, 158, 11, 0.25);
 }
 
-/* Active: breathe in and out */
 @keyframes breathe {
   0%   { transform: scale(1);    }
   50%  { transform: scale(1.10); }
@@ -151,15 +146,10 @@
   animation: breathe 1.4s ease-in-out infinite;
 }
 
-.convo-circle--ai.convo-circle--active {
-  box-shadow: 0 8px 48px rgba(124, 58, 237, 0.5);
-}
-
 .convo-circle--human.convo-circle--active {
   box-shadow: 0 8px 48px rgba(245, 158, 11, 0.5);
 }
 
-/* Radiating rings */
 .convo-ring {
   position: absolute;
   border-radius: 50%;
@@ -171,18 +161,17 @@
   100% { transform: scale(1.9); opacity: 0;    }
 }
 
-.convo-ring--1 { width: 200px; height: 200px; animation: radiate 1.8s ease-out infinite 0s;    }
-.convo-ring--2 { width: 200px; height: 200px; animation: radiate 1.8s ease-out infinite 0.6s;  }
-.convo-ring--3 { width: 200px; height: 200px; animation: radiate 1.8s ease-out infinite 1.2s;  }
+.convo-ring--1 { width: 300px; height: 300px; animation: radiate 1.8s ease-out infinite 0s;   }
+.convo-ring--2 { width: 300px; height: 300px; animation: radiate 1.8s ease-out infinite 0.6s; }
+.convo-ring--3 { width: 300px; height: 300px; animation: radiate 1.8s ease-out infinite 1.2s; }
 
-.convo-ring--ai    { border: 3px solid #7c3aed; }
 .convo-ring--human { border: 3px solid #f59e0b; }
 
-/* Mobile: stack vertically */
 @media (max-width: 600px) {
   .convo-split {
     flex-direction: column;
     padding: 0 1rem 1rem;
+    overflow-y: auto;
   }
 
   .convo-divider {
@@ -191,9 +180,11 @@
     margin: 0 1rem;
   }
 
-  .convo-card {
+  .convo-card,
+  .convo-card--human {
     width: 100%;
-    height: 44vh;
+    height: auto;
+    min-height: 44vh;
     border-radius: 24px;
   }
 }

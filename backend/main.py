@@ -173,12 +173,20 @@ async def evaluate_pronunciation(
         else:
             score = correct_count / len(target_words)
 
+        incorrect_words = [str(item["word"]) for item in analysis if not item["correct"]]
+        
         if score == 1.0:
-            feedback_message = "Masha Allah! Tuin bebbakin saí gori hoiyo. Perfect! You nailed every single word."
+            feedback_message = "Masha Allah! Tuin bebbakin saí gori hoiyo. Beshi bala!"
         elif score >= 0.5:
-            feedback_message = "Bala gorrzo! Beshi híssa saí hoiyo, magar lal hoiya lofz gúin aro bálagori hoitó koshish goroo. Keep it up! Watch your pronunciation on the red words."
+            if len(incorrect_words) == 1:
+                missed_str = f"'{incorrect_words[0]}'"
+            elif len(incorrect_words) == 2:
+                missed_str = f"'{incorrect_words[0]}' ar '{incorrect_words[1]}'"
+            else:
+                missed_str = ", ".join([f"'{w}'" for w in incorrect_words[:-1]]) + f", ar '{incorrect_words[-1]}'"
+            feedback_message = f"Bala gorrzo! Abar koshish goroo ar {missed_str} lofz-or diké nojor deo."
         else:
-            feedback_message = "Koshish gorit táko! Speaker-or awas abar húnou, ar heentikká hoitó koshish goroo. Don't give up! Listen to the audio again and try to match it."
+            feedback_message = f"Koshish gorit táko! Tuin boliyó '{transcription}'. Abar húnou ar heentikká koshish goroo."
 
         # 3. Generate Audio Feedback using ElevenLabs TTS
         tts_url = "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM" # Rachel voice
