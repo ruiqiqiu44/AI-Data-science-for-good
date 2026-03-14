@@ -1,39 +1,24 @@
 #!/usr/bin/env python3
 """
-English Pronunciation Coach for Rohingya Learners
-==================================================
-Uses facebook/wav2vec2-lv-60-espeak-cv-ft to decode audio directly into IPA
-phonemes, compares against espeak-ng reference phonemes, and gives targeted
-feedback focused on the sounds most likely to cause comprehension breakdown.
+English Pronunciation Coach for Rohingya Learners — backend library
+====================================================================
+Exposes three callable functions for the FastAPI server:
 
-Installation
-------------
-  # System dependency (Linux/WSL):
-  sudo apt install espeak-ng
+  audio_bytes_to_numpy(data)          raw audio bytes  → float32 numpy array
+  audio_to_phonemes(audio, proc, mdl) numpy array      → IPA phoneme string
+  expected_phonemes(text)             English text     → IPA phoneme string
+  analyse(expected_str, actual_str)   two IPA strings  → Feedback object
 
-  # Python packages:
-  pip install torch transformers sounddevice scipy phonemizer pyttsx3
-
-  Windows note: espeak-ng installer at https://github.com/espeak-ng/espeak-ng/releases
-  After installing, add its folder to PATH so phonemizer can find it.
-
-
-  Here's how the system works:
-
-Pipeline per attempt:
-
-You pick a target word from the menu (or type your own)
-Optionally hear it read aloud via TTS
-Record 4 seconds of your speech via microphone
-wav2vec2-lv-60-espeak-cv-ft decodes your audio → IPA phonemes (e.g. θ ɹ iː)
-phonemizer generates the reference IPA from the target text (e.g. θ ɹ iː)
-Global sequence alignment (edit-distance DP) matches the two sequences position-by-position
-The error detector checks each aligned pair against the Rohingya-specific rules:
+System dependency: espeak-ng must be installed and on PATH.
+  Linux:   sudo apt install espeak-ng
+  Windows: https://github.com/espeak-ng/espeak-ng/releases
 """
 
+import io
 import numpy as np
 import torch
-import sounddevice as sd
+import soundfile as sf
+from scipy.signal import resample as scipy_resample
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 
 try:
@@ -43,15 +28,7 @@ try:
 except ImportError:
     HAS_PHONEMIZER = False
 
-try:
-    import pyttsx3
-    _tts_engine = pyttsx3.init()
-    HAS_TTS = True
-except Exception:
-    HAS_TTS = False
-
 SAMPLE_RATE = 16000
-RECORD_SECONDS = 4
 
 # ── Phoneme knowledge base ─────────────────────────────────────────────────────
 
@@ -118,7 +95,7 @@ SUBSTITUTION_RULES: dict[tuple[str, str], tuple[str, str, str]] = {
 }
 
 # ── Practice word list ─────────────────────────────────────────────────────────
-
+'''
 PRACTICE_WORDS: list[tuple[str, str]] = [
     ("three",  "TH + long EE + R"),
     ("they",   "Voiced TH"),
@@ -132,7 +109,7 @@ PRACTICE_WORDS: list[tuple[str, str]] = [
     ("bus",    "Final S — don't drop it"),
     ("red",    "English R"),
     ("love",   "Final V sound"),
-]
+]'''
 
 # ── Model ──────────────────────────────────────────────────────────────────────
 
@@ -233,11 +210,13 @@ class Feedback:
         self._seen: set[tuple[str, str]] = set()
 
     def add_high(self, label: str, example: str, tip: str, key: tuple[str, str]) -> None:
+        #critical errors
         if key not in self._seen:
             self._seen.add(key)
             self.high.append((label, example, tip))
 
     def add_low(self, note: str) -> None:
+        #non critical errors
         if note not in self.low:
             self.low.append(note)
 
@@ -245,30 +224,15 @@ class Feedback:
     def score(self) -> int:
         return max(0, 100 - len(self.high) * 15)
 
-    def display(self) -> None:
-        bar = "=" * 62
-        print(f"\n{bar}")
-        s = self.score
-        if not self.high:
-            print("  Excellent! Very clear pronunciation.")
-        elif s >= 70:
-            print(f"  Good effort — keep going!  Score: {s}/100")
-        else:
-            print(f"  Keep practising — you are improving!  Score: {s}/100")
-
-        if self.high:
-            print("\n  Focus on these sounds (they can confuse listeners):\n")
-            for label, example, tip in self.high:
-                print(f"  !! {label}")
-                print(f"     Example words : {example}")
-                print(f"     How to fix    : {tip}\n")
-
-        if self.low:
-            print("  Minor notes (these will NOT confuse people, just FYI):")
-            for note in self.low:
-                print(f"  ~  {note}")
-
-        print(bar)
+    def to_dict(self) -> dict:
+        return {
+            "score": self.score,
+            "errors": [
+                {"label": label, "examples": example, "tip": tip}
+                for label, example, tip in self.high
+            ],
+            "minor_notes": self.low,
+        }
 
 
 def analyse(expected_str: str, actual_str: str) -> Feedback:
@@ -285,8 +249,8 @@ def analyse(expected_str: str, actual_str: str) -> Feedback:
                 label, example, tip = SUBSTITUTION_RULES[key]
                 fb.add_high(label, example, tip, key)
             # Unlisted substitution into a low-priority bucket
-            elif e in LOW_PRIORITY_PHONEMES:
-                fb.add_low(f'/{e}/ sounded like /{a}/ — minor accent, still understood.')
+            #elif e in LOW_PRIORITY_PHONEMES:
+                #fb.add_low(f'/{e}/ sounded like /{a}/ — minor accent, still understood.')
 
         # ── Final consonant dropped ────────────────────────────────────────
         if e is not None and a is None:
@@ -303,92 +267,19 @@ def analyse(expected_str: str, actual_str: str) -> Feedback:
     return fb
 
 
-# ── Audio helpers ──────────────────────────────────────────────────────────────
+# ── Audio ingestion ────────────────────────────────────────────────────────────
 
-def record(seconds: int = RECORD_SECONDS) -> np.ndarray:
-    print(f"\n  [Recording {seconds}s — speak now!]")
-    audio = sd.rec(int(seconds * SAMPLE_RATE), samplerate=SAMPLE_RATE, channels=1, dtype="float32")
-    sd.wait()
-    print("  [Done recording]")
-    return audio.squeeze()
+def audio_bytes_to_numpy(data: bytes) -> np.ndarray:
+    """Convert raw audio bytes (WAV, FLAC, OGG) to a 16 kHz mono float32 array.
 
-
-def speak(text: str) -> None:
-    if HAS_TTS:
-        _tts_engine.say(text)
-        _tts_engine.runAndWait()
-
-
-# ── CLI ────────────────────────────────────────────────────────────────────────
-
-def menu() -> None:
-    print("\n  Choose a word to practise:")
-    for idx, (word, hint) in enumerate(PRACTICE_WORDS, 1):
-        print(f"    {idx:2}.  {word:<10}  ({hint})")
-    print("     0.  Type your own word or short phrase")
-    print("     q.  Quit")
-
-
-def main() -> None:
-    print("\n" + "=" * 62)
-    print("  English Pronunciation Coach  —  Rohingya Learner Edition")
-    print("=" * 62)
-    print("  Goal: be understood, not accent-free. You can do this!")
-    if not HAS_PHONEMIZER:
-        print("\n  [Warning] phonemizer not installed — feedback will be limited.")
-        print("  Install: pip install phonemizer  (also needs espeak-ng)")
-    if HAS_TTS:
-        print("  [TTS enabled] You will hear each target word read aloud.")
-
-    processor, model = load_model()
-
-    while True:
-        menu()
-        choice = input("\n  Your choice: ").strip().lower()
-
-        if choice == "q":
-            print("\n  Great work today! Keep practising every day.\n")
-            break
-
-        if choice == "0":
-            target = input("  Enter word or phrase: ").strip()
-        elif choice.isdigit() and 1 <= int(choice) <= len(PRACTICE_WORDS):
-            target, _ = PRACTICE_WORDS[int(choice) - 1]
-        else:
-            print("  Invalid choice — try again.")
-            continue
-
-        print(f'\n  Target: "{target}"')
-
-        # Compute reference phonemes
-        ref_str = expected_phonemes(target)
-        if ref_str:
-            print(f"  Expected phonemes : /{ref_str}/")
-
-        # Optionally play TTS so the learner hears the word
-        if HAS_TTS:
-            play = input("  Hear the word read aloud first? (y/n): ").strip().lower()
-            if play == "y":
-                speak(target)
-
-        input("\n  Press Enter and then say the word …")
-        audio = record()
-
-        print("  Analysing …")
-        actual_str = audio_to_phonemes(audio, processor, model)
-        print(f"  Your phonemes     : /{actual_str}/")
-
-        if ref_str:
-            fb = analyse(ref_str, actual_str)
-            fb.display()
-        else:
-            print("\n  (Install phonemizer for detailed feedback.)")
-            print(f"  Detected: /{actual_str}/")
-
-        again = input("\n  Practise this word again? (y/n): ").strip().lower()
-        if again != "y":
-            pass  # loop back to menu
-
-
-if __name__ == "__main__":
-    main()
+    The frontend should send audio captured via MediaRecorder. Recommended
+    MIME type: audio/ogg;codecs=opus (supported by soundfile via libsndfile).
+    WAV and FLAC also work without any extra system dependencies.
+    """
+    audio, sr = sf.read(io.BytesIO(data), dtype="float32", always_2d=False)
+    if audio.ndim == 2:          # stereo → mono
+        audio = audio.mean(axis=1)
+    if sr != SAMPLE_RATE:        # resample to 16 kHz if needed
+        n_target = int(len(audio) * SAMPLE_RATE / sr)
+        audio = scipy_resample(audio, n_target)
+    return audio.astype(np.float32)

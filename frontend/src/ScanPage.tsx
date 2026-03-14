@@ -61,6 +61,82 @@ const WORD_MAP: Record<string, { emoji: string; bg: string; color: string; meani
   sunday:      { emoji: '☀️', bg: '#fef3c7', color: '#d97706', meaning: 'Rest day / weekend' },
   today:       { emoji: '📅', bg: '#e0f2fe', color: '#0284c7', meaning: 'This day — now' },
   tomorrow:    { emoji: '⏭️', bg: '#e0f2fe', color: '#0284c7', meaning: 'The next day' },
+  // Common words
+  not:         { emoji: '🚫', bg: '#fee2e2', color: '#dc2626', meaning: 'Do not do this' },
+  only:        { emoji: '1️⃣', bg: '#fef3c7', color: '#b45309', meaning: 'Just this, nothing else' },
+  all:         { emoji: '✅', bg: '#dcfce7', color: '#16a34a', meaning: 'Everything / everyone' },
+  new:         { emoji: '🆕', bg: '#dcfce7', color: '#16a34a', meaning: 'Recently made' },
+  now:         { emoji: '⚡', bg: '#fef3c7', color: '#d97706', meaning: 'At this moment' },
+  
+  // Health extra
+  sick:        { emoji: '🤒', bg: '#fee2e2', color: '#dc2626', meaning: 'Not feeling well' },
+  pain:        { emoji: '😣', bg: '#fee2e2', color: '#dc2626', meaning: 'Something hurts' },
+  fever:       { emoji: '🌡️', bg: '#fee2e2', color: '#dc2626', meaning: 'Body is too hot' },
+  blood:       { emoji: '🩸', bg: '#fee2e2', color: '#dc2626', meaning: 'Red liquid in body' },
+  pregnant:    { emoji: '🤰', bg: '#fce7f3', color: '#be185d', meaning: 'Having a baby' },
+  baby:        { emoji: '👶', bg: '#fce7f3', color: '#be185d', meaning: 'Very young child' },
+  child:       { emoji: '🧒', bg: '#fce7f3', color: '#be185d', meaning: 'Young person' },
+  insurance:   { emoji: '📋', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Paper that pays for health' },
+
+  // Grocery extra
+  expired:     { emoji: '❌', bg: '#fee2e2', color: '#dc2626', meaning: 'Too old — do not eat' },
+  organic:     { emoji: '🌿', bg: '#dcfce7', color: '#15803d', meaning: 'Natural / no chemicals' },
+  frozen:      { emoji: '🧊', bg: '#e0f2fe', color: '#0284c7', meaning: 'Very cold / in freezer' },
+  fresh:       { emoji: '✅', bg: '#dcfce7', color: '#16a34a', meaning: 'New and good to eat' },
+  dairy:       { emoji: '🥛', bg: '#e0f2fe', color: '#0284c7', meaning: 'Milk products' },
+  gluten:      { emoji: '🌾', bg: '#fef3c7', color: '#b45309', meaning: 'In bread — can cause allergy' },
+  checkout:    { emoji: '💳', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Pay here' },
+  aisle:       { emoji: '➡️', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Row between shelves' },
+  discount:    { emoji: '🏷️', bg: '#dcfce7', color: '#16a34a', meaning: 'Lower price' },
+  receipt:     { emoji: '🧾', bg: '#f1f5f9', color: '#475569', meaning: 'Paper showing what you paid' },
+
+  // Transport extra
+  route:       { emoji: '🗺️', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Path the bus takes' },
+  fare:        { emoji: '💰', bg: '#fef3c7', color: '#b45309', meaning: 'Money to ride the bus' },
+  transfer:    { emoji: '🔄', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Switch to another bus' },
+  delay:       { emoji: '⏳', bg: '#fef3c7', color: '#b45309', meaning: 'Late / not on time' },
+  platform:    { emoji: '🚉', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Where you wait for train' },
+  terminal:    { emoji: '🏢', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Main station building' },
+  departure:   { emoji: '🛫', bg: '#e0f2fe', color: '#0284c7', meaning: 'Leaving time' },
+  arrival:     { emoji: '🛬', bg: '#dcfce7', color: '#16a34a', meaning: 'Arriving time' },
+  ticket:      { emoji: '🎫', bg: '#fef3c7', color: '#b45309', meaning: 'Paper to ride' },
+  monthly:     { emoji: '📅', bg: '#e0f2fe', color: '#0284c7', meaning: 'Every month' },
+
+  // Housing extra
+  landlord:    { emoji: '🏠', bg: '#fff7ed', color: '#c2410c', meaning: 'Person who owns building' },
+  tenant:      { emoji: '🧑', bg: '#fff7ed', color: '#c2410c', meaning: 'Person who rents' },
+  deposit:     { emoji: '💵', bg: '#dcfce7', color: '#16a34a', meaning: 'Money saved for damage' },
+  lease:       { emoji: '📝', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Paper about renting' },
+  repair:      { emoji: '🛠️', bg: '#fef3c7', color: '#b45309', meaning: 'Fix something broken' },
+  heat:        { emoji: '🔥', bg: '#fee2e2', color: '#dc2626', meaning: 'Warmth in your home' },
+  laundry:     { emoji: '👕', bg: '#e0f2fe', color: '#0284c7', meaning: 'Washing clothes' },
+  basement:    { emoji: '⬇️', bg: '#f1f5f9', color: '#475569', meaning: 'Room below ground' },
+  balcony:     { emoji: '🌅', bg: '#e0f2fe', color: '#0284c7', meaning: 'Outside area on building' },
+  furnished:   { emoji: '🛋️', bg: '#fef3c7', color: '#b45309', meaning: 'Has furniture inside' },
+
+  // Work extra
+  resume:      { emoji: '📄', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Paper about your work history' },
+  shift:       { emoji: '🕐', bg: '#fef3c7', color: '#b45309', meaning: 'Your hours of work' },
+  manager:     { emoji: '👔', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Person in charge' },
+  salary:      { emoji: '💵', bg: '#dcfce7', color: '#16a34a', meaning: 'Money you earn' },
+  training:    { emoji: '📚', bg: '#ede9fe', color: '#6d28d9', meaning: 'Learning for your job' },
+  contract:    { emoji: '📝', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Paper about your job' },
+  paycheck:    { emoji: '💳', bg: '#dcfce7', color: '#16a34a', meaning: 'Money from your job' },
+  fulltime:    { emoji: '📅', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Working all week' },
+  parttime:    { emoji: '🕐', bg: '#fef3c7', color: '#b45309', meaning: 'Working some days' },
+  uniform:     { emoji: '👕', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Special clothes for work' },
+
+  // School extra
+  register:    { emoji: '📝', bg: '#ede9fe', color: '#6d28d9', meaning: 'Sign up / enroll' },
+  grade:       { emoji: '⭐', bg: '#fef3c7', color: '#d97706', meaning: 'School level or mark' },
+  homework:    { emoji: '📚', bg: '#ede9fe', color: '#6d28d9', meaning: 'Work to do at home' },
+  absent:      { emoji: '❌', bg: '#fee2e2', color: '#dc2626', meaning: 'Not at school today' },
+  permission:  { emoji: '✅', bg: '#dcfce7', color: '#16a34a', meaning: 'Allowed to do something' },
+  pickup:      { emoji: '🚗', bg: '#dbeafe', color: '#1d4ed8', meaning: 'Come get your child' },
+  dismissal:   { emoji: '🔔', bg: '#fef3c7', color: '#d97706', meaning: 'School day is ending' },
+  cafeteria:   { emoji: '🍽️', bg: '#dcfce7', color: '#15803d', meaning: 'Place to eat at school' },
+  principal:   { emoji: '👩‍💼', bg: '#ede9fe', color: '#6d28d9', meaning: 'Head of the school' },
+  volunteer:   { emoji: '🙋', bg: '#dcfce7', color: '#16a34a', meaning: 'Help without being paid' },
 }
 
 type WordEntry = { word: string; emoji: string; bg: string; color: string; meaning: string }

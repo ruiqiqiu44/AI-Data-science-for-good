@@ -1,12 +1,34 @@
 import { useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './ConversationPage.css'
+import { BACKEND_URL } from './config'
 
 // ---------------------------------------------------------------------------
-// Placeholder — replace with real API call
+// Send recorded audio to backend API for processing
 // ---------------------------------------------------------------------------
-function sendRecordedAudio(_audio: Blob): void {
-  // TODO: POST audio to backend API
+async function sendRecordedAudio(audio: Blob) {
+  try {
+    // Create FormData to send the audio blob
+    const formData = new FormData()
+    formData.append('audio', audio, 'recording.wav')
+
+    // TODO: Replace with your actual API endpoint
+    const response = await fetch(`${BACKEND_URL}/process-audio`, {
+      method: 'POST',
+      body: formData,
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const result = await response.json()
+    console.log('Audio processing result:', result)
+
+  } catch (error) {
+    console.error('Error sending audio to API:', error)
+    // TODO: Handle error - show user-friendly error message
+  }
 }
 // ---------------------------------------------------------------------------
 
