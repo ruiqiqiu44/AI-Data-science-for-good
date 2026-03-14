@@ -80,7 +80,7 @@ const WORD_MAP: Record<string, { emoji: string; bg: string; color: string; meani
 
   // Grocery extra
   expired:     { emoji: '❌', bg: '#fee2e2', color: '#dc2626', meaning: 'Too old — do not eat' },
-  organic:     { emoji: '🌿', bg: '#dcfce7', color: '#15803d', meaning: 'Natural / no chemicals' },
+  vegan:       { emoji: '🌿', bg: '#dcfce7', color: '#15803d', meaning: 'Natural / no chemicals' },
   frozen:      { emoji: '🧊', bg: '#e0f2fe', color: '#0284c7', meaning: 'Very cold / in freezer' },
   fresh:       { emoji: '✅', bg: '#dcfce7', color: '#16a34a', meaning: 'New and good to eat' },
   dairy:       { emoji: '🥛', bg: '#e0f2fe', color: '#0284c7', meaning: 'Milk products' },
