@@ -178,24 +178,6 @@ function App() {
       <header className="app-header">
         <span className="header-icon">🗪</span>
         <h1 className="app-title">Or pick a scenario</h1>
-        <button
-            className="header-audio-btn"
-            onClick={() => {
-            // TODO: Wire up the global instruction audio playback here
-            console.log("Speaker icon clicked: Play scenario instructions");
-            }}
-            aria-label="Listen to instructions"
-            style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '1.2rem', /* Scaled slightly to match the text baseline */
-            padding: 0,
-            margin: 0
-            }}
-        >
-            🔊
-        </button>
       </header>
 
       <div className="scenario-grid">
