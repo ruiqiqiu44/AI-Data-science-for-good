@@ -110,7 +110,7 @@ def get_scenarios():
 def get_phrases(scenario: str = Query(...)):
     return [p for p in phrases if p["scenario"] == scenario]
 
-ELEVENLABS_API_KEY = "sk_211b923e77237f890ec53f06b61f179deeedaf460804020b"
+ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_KEY")
 ELEVENLABS_STT_URL = "https://api.elevenlabs.io/v1/speech-to-text"
 
 @app.post("/evaluate-pronunciation")
