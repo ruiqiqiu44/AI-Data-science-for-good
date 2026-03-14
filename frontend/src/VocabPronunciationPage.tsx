@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './VocabPronunciationPage.css'
 import { BACKEND_URL } from './config'
@@ -16,10 +16,16 @@ async function getPronunciationFeedback(word: string, audio: Blob): Promise<void
     body,
   })
 
-  const result = await response.json()
-  console.log(result)
+  const feedback = await response.json()
+  console.log('Pronunciation feedback:', feedback)
 }
 // ---------------------------------------------------------------------------
+
+async function fetchImages(word: string): Promise<string[]> {
+  const response = await fetch(`${BACKEND_URL}/images/?query=${encodeURIComponent(word)}`)
+  const data: { url: string }[] = await response.json()
+  return data.map((item) => item.url)
+}
 
 function speakWord(word: string) {
   if (!window.speechSynthesis) return
@@ -30,138 +36,13 @@ function speakWord(word: string) {
   window.speechSynthesis.speak(utterance)
 }
 
-interface VocabItem {
-  word: string
-  images: [string, string, string, string]
-}
-
 // ---------------------------------------------------------------------------
-// Placeholder — replace with real API call keyed on scenarioId
+// Words per scenario — images are fetched live from the backend
 // ---------------------------------------------------------------------------
-const VOCAB_DATA: Record<string, VocabItem[]> = {
-  grocery: [
-    {
-      word: 'Apple',
-      images: [
-        'https://picsum.photos/seed/apple1/400/300',
-        'https://picsum.photos/seed/apple2/400/300',
-        'https://picsum.photos/seed/apple3/400/300',
-        'https://picsum.photos/seed/apple4/400/300',
-      ],
-    },
-    {
-      word: 'Milk',
-      images: [
-        'https://picsum.photos/seed/milk1/400/300',
-        'https://picsum.photos/seed/milk2/400/300',
-        'https://picsum.photos/seed/milk3/400/300',
-        'https://picsum.photos/seed/milk4/400/300',
-      ],
-    },
-    {
-      word: 'Bread',
-      images: [
-        'https://picsum.photos/seed/bread1/400/300',
-        'https://picsum.photos/seed/bread2/400/300',
-        'https://picsum.photos/seed/bread3/400/300',
-        'https://picsum.photos/seed/bread4/400/300',
-      ],
-    },
-    {
-      word: 'Shopping Cart',
-      images: [
-        'https://picsum.photos/seed/cart1/400/300',
-        'https://picsum.photos/seed/cart2/400/300',
-        'https://picsum.photos/seed/cart3/400/300',
-        'https://picsum.photos/seed/cart4/400/300',
-      ],
-    },
-    {
-      word: 'Checkout',
-      images: [
-        'https://picsum.photos/seed/checkout1/400/300',
-        'https://picsum.photos/seed/checkout2/400/300',
-        'https://picsum.photos/seed/checkout3/400/300',
-        'https://picsum.photos/seed/checkout4/400/300',
-      ],
-    },
-  ],
-  pharmacy: [
-    {
-      word: 'Medicine',
-      images: [
-        'https://picsum.photos/seed/medicine1/400/300',
-        'https://picsum.photos/seed/medicine2/400/300',
-        'https://picsum.photos/seed/medicine3/400/300',
-        'https://picsum.photos/seed/medicine4/400/300',
-      ],
-    },
-    {
-      word: 'Doctor',
-      images: [
-        'https://picsum.photos/seed/doctor1/400/300',
-        'https://picsum.photos/seed/doctor2/400/300',
-        'https://picsum.photos/seed/doctor3/400/300',
-        'https://picsum.photos/seed/doctor4/400/300',
-      ],
-    },
-    {
-      word: 'Prescription',
-      images: [
-        'https://picsum.photos/seed/prescription1/400/300',
-        'https://picsum.photos/seed/prescription2/400/300',
-        'https://picsum.photos/seed/prescription3/400/300',
-        'https://picsum.photos/seed/prescription4/400/300',
-      ],
-    },
-    {
-      word: 'Bandage',
-      images: [
-        'https://picsum.photos/seed/bandage1/400/300',
-        'https://picsum.photos/seed/bandage2/400/300',
-        'https://picsum.photos/seed/bandage3/400/300',
-        'https://picsum.photos/seed/bandage4/400/300',
-      ],
-    },
-  ],
-  transport: [
-    {
-      word: 'Bus',
-      images: [
-        'https://picsum.photos/seed/bus1/400/300',
-        'https://picsum.photos/seed/bus2/400/300',
-        'https://picsum.photos/seed/bus3/400/300',
-        'https://picsum.photos/seed/bus4/400/300',
-      ],
-    },
-    {
-      word: 'Ticket',
-      images: [
-        'https://picsum.photos/seed/ticket1/400/300',
-        'https://picsum.photos/seed/ticket2/400/300',
-        'https://picsum.photos/seed/ticket3/400/300',
-        'https://picsum.photos/seed/ticket4/400/300',
-      ],
-    },
-    {
-      word: 'Bus Stop',
-      images: [
-        'https://picsum.photos/seed/busstop1/400/300',
-        'https://picsum.photos/seed/busstop2/400/300',
-        'https://picsum.photos/seed/busstop3/400/300',
-        'https://picsum.photos/seed/busstop4/400/300',
-      ],
-    },
-    {
-      word: 'Train Station',
-      images: [
-        'https://picsum.photos/seed/station1/400/300',
-        'https://picsum.photos/seed/station2/400/300',
-        'https://picsum.photos/seed/station3/400/300',
-        'https://picsum.photos/seed/station4/400/300',
-      ],
-    },
-  ],
+const VOCAB_WORDS: Record<string, string[]> = {
+  grocery:  ['Apple', 'Milk', 'Bread', 'Shopping Cart', 'Checkout'],
+  pharmacy: ['Medicine', 'Doctor', 'Prescription', 'Bandage'],
+  transport: ['Bus', 'Ticket', 'Bus Stop', 'Train Station'],
 }
 // ---------------------------------------------------------------------------
 
@@ -170,12 +51,23 @@ export default function VocabPronunciationPage() {
   const navigate = useNavigate()
   const [index, setIndex] = useState(0)
   const [recording, setRecording] = useState(false)
+  const [images, setImages] = useState<string[]>([])
+  const [imagesLoading, setImagesLoading] = useState(false)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
 
-  const items = VOCAB_DATA[scenarioId ?? ''] ?? []
-  const current = items[index]
+  const words = VOCAB_WORDS[scenarioId ?? ''] ?? []
+  const currentWord = words[index]
+
+  useEffect(() => {
+    if (!currentWord) return
+    setImagesLoading(true)
+    setImages([])
+    fetchImages(currentWord)
+      .then(setImages)
+      .finally(() => setImagesLoading(false))
+  }, [currentWord])
 
   async function startRecording() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -188,7 +80,7 @@ export default function VocabPronunciationPage() {
 
     recorder.onstop = () => {
       const audio = new Blob(chunksRef.current, { type: recorder.mimeType })
-      getPronunciationFeedback(current.word, audio)
+      getPronunciationFeedback(currentWord, audio)
       stream.getTracks().forEach((t) => t.stop())
     }
 
@@ -210,15 +102,15 @@ export default function VocabPronunciationPage() {
         ← Back
       </button>
 
-      {current ? (
+      {currentWord ? (
         <>
           <div className="vocab-word-row">
             <button
               className="vocab-word-btn"
-              onClick={() => speakWord(current.word)}
-              aria-label={`Hear pronunciation of ${current.word}`}
+              onClick={() => speakWord(currentWord)}
+              aria-label={`Hear pronunciation of ${currentWord}`}
             >
-              <span className="vocab-word">{current.word}</span>
+              <span className="vocab-word">{currentWord}</span>
               <span className="vocab-speaker">🔊</span>
             </button>
 
@@ -232,11 +124,16 @@ export default function VocabPronunciationPage() {
           </div>
 
           <div className="vocab-image-grid">
-            {current.images.map((url, i) => (
-              <div key={i} className="vocab-image-cell">
-                <img src={url} alt={`${current.word} ${i + 1}`} />
-              </div>
-            ))}
+            {imagesLoading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="vocab-image-cell vocab-image-cell--loading" />
+                ))
+              : images.map((url, i) => (
+                  <div key={i} className="vocab-image-cell">
+                    <img src={url} alt={`${currentWord} ${i + 1}`} />
+                  </div>
+                ))
+            }
           </div>
 
           <div className="vocab-nav">
@@ -247,11 +144,11 @@ export default function VocabPronunciationPage() {
             >
               ←
             </button>
-            <span className="vocab-counter">{index + 1} / {items.length}</span>
+            <span className="vocab-counter">{index + 1} / {words.length}</span>
             <button
               className="vocab-nav-btn"
               onClick={() => setIndex((i) => i + 1)}
-              disabled={index === items.length - 1}
+              disabled={index === words.length - 1}
             >
               →
             </button>
