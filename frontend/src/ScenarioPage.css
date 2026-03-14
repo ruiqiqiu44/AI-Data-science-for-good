@@ -1,0 +1,121 @@
+.mode-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f5f0eb;
+}
+
+.back-btn {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.75rem 1.25rem;
+  margin: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #64748b;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  transition: color 0.15s, border-color 0.15s;
+  width: fit-content;
+}
+
+.back-btn:hover {
+  color: #1a1a1a;
+  border-color: #94a3b8;
+}
+
+.mode-split {
+  display: flex;
+  flex: 1;
+  gap: 1.25rem;
+  padding: 0 1.25rem 1.25rem;
+  min-height: 0;
+  height: calc(100vh - 72px);
+}
+
+/* Each half-page card */
+.mode-card {
+  all: unset;
+  cursor: pointer;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  border-radius: 28px;
+  border: 3px solid transparent;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+}
+
+.mode-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.14);
+}
+
+.mode-card:active {
+  transform: scale(0.99);
+}
+
+.mode-card--vocab {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.mode-card--vocab:hover {
+  border-color: #f59e0b;
+}
+
+.mode-card--convo {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+}
+
+.mode-card--convo:hover {
+  border-color: #a78bfa;
+}
+
+.mode-illustration {
+  width: 100%;
+  max-width: 340px;
+}
+
+.mode-illustration svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.mode-label {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1a1a1a;
+}
+
+.mode-card--vocab .mode-label {
+  color: #b45309;
+}
+
+.mode-card--convo .mode-label {
+  color: #6d28d9;
+}
+
+/* Mobile: stack vertically */
+@media (max-width: 600px) {
+  .mode-split {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .mode-card {
+    min-height: 44vh;
+  }
+}
