@@ -81,12 +81,12 @@ export default function ScenarioPage() {
       <div className="mode-split">
         <button
           className="mode-card mode-card--vocab"
-          onClick={() => navigate(`/scenario/${scenarioId}/vocabulary`)}
+          onClick={() => navigate(`/scenario/${scenarioId}/vocab-pronunciation`)}
         >
           <div className="mode-illustration">
             <VocabularyIllustration />
           </div>
-          <div className="mode-label">📖 Vocabulary</div>
+          <div className="mode-label">📖 Vocabulary &amp; Pronunciation</div>
         </button>
 
         <button

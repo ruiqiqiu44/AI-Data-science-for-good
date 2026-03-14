@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import './VocabularyPage.css'
+import './VocabPronunciationPage.css'
 
 function speakWord(word: string) {
   if (!window.speechSynthesis) return
@@ -146,7 +146,7 @@ const VOCAB_DATA: Record<string, VocabItem[]> = {
 }
 // ---------------------------------------------------------------------------
 
-export default function VocabularyPage() {
+export default function VocabPronunciationPage() {
   const { scenarioId } = useParams<{ scenarioId: string }>()
   const navigate = useNavigate()
   const [index, setIndex] = useState(0)
@@ -198,7 +198,7 @@ export default function VocabularyPage() {
           </div>
         </>
       ) : (
-        <p className="vocab-empty">No vocabulary found for this scenario.</p>
+        <p className="vocab-empty">No vocabulary &amp; pronunciation content found for this scenario.</p>
       )}
     </div>
   )
