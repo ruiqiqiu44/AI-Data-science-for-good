@@ -1,0 +1,199 @@
+.convo-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  align-self: stretch;
+  background-color: #f5f0eb;
+}
+
+.convo-back-btn {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.1rem;
+  margin: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #64748b;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  transition: color 0.15s, border-color 0.15s;
+  width: fit-content;
+}
+
+.convo-back-btn:hover {
+  color: #1a1a1a;
+  border-color: #94a3b8;
+}
+
+/* Two-column split */
+.convo-split {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  padding: 0 1.25rem 1.25rem;
+  gap: 1.25rem;
+}
+
+.convo-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.convo-divider {
+  width: 2px;
+  background: #e2e8f0;
+  align-self: stretch;
+  margin: 0 0 1.25rem;
+}
+
+/* Rounded rectangle card inside each half */
+.convo-card {
+  width: 88%;
+  height: 88%;
+  border-radius: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.convo-card--ai {
+  background: linear-gradient(160deg, #f5f3ff 0%, #ede9fe 100%);
+  border: 2.5px solid #ddd6fe;
+}
+
+.convo-card--human {
+  background: linear-gradient(160deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2.5px solid #fde68a;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.convo-card--human:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 6px 32px rgba(245, 158, 11, 0.18);
+}
+
+.convo-card--recording {
+  border-color: #ef4444 !important;
+  box-shadow: 0 6px 32px rgba(239, 68, 68, 0.2) !important;
+}
+
+.convo-card--recording .convo-side-label {
+  color: #ef4444;
+}
+
+.convo-side-label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+/* Circle */
+.convo-circle-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 220px;
+  height: 220px;
+}
+
+.convo-circle {
+  all: unset;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.convo-circle svg {
+  width: 110px;
+  height: 110px;
+}
+
+.convo-circle--ai {
+  background: #7c3aed;
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.25);
+}
+
+.convo-circle--human {
+  background: #f59e0b;
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.25);
+}
+
+/* Active: breathe in and out */
+@keyframes breathe {
+  0%   { transform: scale(1);    }
+  50%  { transform: scale(1.10); }
+  100% { transform: scale(1);    }
+}
+
+.convo-circle--active {
+  animation: breathe 1.4s ease-in-out infinite;
+}
+
+.convo-circle--ai.convo-circle--active {
+  box-shadow: 0 8px 48px rgba(124, 58, 237, 0.5);
+}
+
+.convo-circle--human.convo-circle--active {
+  box-shadow: 0 8px 48px rgba(245, 158, 11, 0.5);
+}
+
+/* Radiating rings */
+.convo-ring {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+@keyframes radiate {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  100% { transform: scale(1.9); opacity: 0;    }
+}
+
+.convo-ring--1 { width: 200px; height: 200px; animation: radiate 1.8s ease-out infinite 0s;    }
+.convo-ring--2 { width: 200px; height: 200px; animation: radiate 1.8s ease-out infinite 0.6s;  }
+.convo-ring--3 { width: 200px; height: 200px; animation: radiate 1.8s ease-out infinite 1.2s;  }
+
+.convo-ring--ai    { border: 3px solid #7c3aed; }
+.convo-ring--human { border: 3px solid #f59e0b; }
+
+/* Mobile: stack vertically */
+@media (max-width: 600px) {
+  .convo-split {
+    flex-direction: column;
+    padding: 0 1rem 1rem;
+  }
+
+  .convo-divider {
+    width: auto;
+    height: 2px;
+    margin: 0 1rem;
+  }
+
+  .convo-card {
+    width: 100%;
+    height: 44vh;
+    border-radius: 24px;
+  }
+}
