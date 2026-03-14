@@ -1,14 +1,29 @@
-from fastapi import FastAPI
-from tts import text_to_speech
+from fastapi import FastAPI, Query
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+phrases = [
+    {
+        "id": 1,
+        "scenario": "cashier",
+        "english_phrase": "Would you like a bag?",
+        "english_pronunciation": "WUD you lyk uh BAG?",
+        "image_url": "https://yourstorage.com/images/cashier_bag.png"
+    }
+]
 
-@app.post("/tts/")
-def tts(text: str):
-    audio_file = text_to_speech(text)
-    return {"audio_file": audio_file}
+@app.get("/scenarios")
+def get_scenarios():
+    return list(set(p["scenario"] for p in phrases))
+
+@app.get("/phrases")
+def get_phrases(scenario: str = Query(...)):
+    return [p for p in phrases if p["scenario"] == scenario]
