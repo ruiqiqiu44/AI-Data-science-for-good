@@ -1,21 +1,23 @@
 import { useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './VocabPronunciationPage.css'
+import { BACKEND_URL } from './config'
 
 // ---------------------------------------------------------------------------
 // API call — receives the target word and the recorded attempt, returns feedback
 // ---------------------------------------------------------------------------
 async function getPronunciationFeedback(word: string, audio: Blob): Promise<void> {
   const body = new FormData()
-  body.append('word', word)
+  body.append('target', word)
   body.append('audio', audio, 'recording.webm')
 
-  const response = await fetch('http://localhost:8000/pronunciation-feedback', {
+  const response = await fetch(`${BACKEND_URL}/recog/`, {
     method: 'POST',
     body,
   })
 
-  await response.json()  // TODO: handle feedback response
+  const result = await response.json()
+  console.log(result)
 }
 // ---------------------------------------------------------------------------
 
@@ -193,6 +195,7 @@ export default function VocabPronunciationPage() {
     recorder.start()
     mediaRecorderRef.current = recorder
     setRecording(true)
+    console.log('recording')
   }
 
   function stopRecording() {
