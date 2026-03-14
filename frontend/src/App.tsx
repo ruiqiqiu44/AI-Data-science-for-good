@@ -147,22 +147,31 @@ function App() {
 
   return (
     <div className="app">
+
+      {/* Scan section */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+        <button
+          onClick={() => navigate('/scan')}
+          style={{
+            background: '#1e293b',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 16,
+            padding: '16px 32px',
+            fontSize: 18,
+            fontWeight: 800,
+            cursor: 'pointer',
+          }}
+        >
+          📷 Scan a Photo
+        </button>
+      </div>
+
+      {/* Scenario section */}
       <header className="app-header">
         <span className="header-icon">🗪</span>
-        <h1 className="app-title">Pick a scenario</h1>
+        <h1 className="app-title">Or pick a scenario</h1>
       </header>
-
-      <button
-        onClick={() => navigate('/scan')}
-        style={{
-          background: '#1e293b', color: '#fff', border: 'none',
-          borderRadius: 16, padding: '14px 28px',
-          fontSize: 16, fontWeight: 800, cursor: 'pointer',
-        }}
-      >
-        📷 Scan a Photo
-      </button>
-
 
       <div className="scenario-grid">
         {scenarios.map((s) => (
@@ -186,6 +195,7 @@ function App() {
           </button>
         ))}
       </div>
+
     </div>
   )
 }
