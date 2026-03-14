@@ -1,5 +1,7 @@
-import { useParams, useNavigate } from 'react-router-dom'
-import './ScenarioPage.css'
+import { useParams, useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
+import './ScenarioPage.css';
+import { hasUserInteracted } from './audio';
 
 function VocabularyIllustration() {
   return (
@@ -69,8 +71,30 @@ function ConversationIllustration() {
 }
 
 export default function ScenarioPage() {
-  const { scenarioId } = useParams<{ scenarioId: string }>()
-  const navigate = useNavigate()
+  const { scenarioId } = useParams<{ scenarioId: string }>();
+  const navigate = useNavigate();
+  const currentAudio = useRef<HTMLAudioElement | null>(null);
+
+  const playAudio = (audioSrc: string) => {
+    if (!hasUserInteracted) {
+      return;
+    }
+    // Stop any currently playing audio
+    if (currentAudio.current) {
+      currentAudio.current.pause();
+    }
+    // Play new audio
+    currentAudio.current = new Audio(audioSrc);
+    currentAudio.current.play().catch(err => console.error("Audio playback failed:", err));
+  };
+
+  const stopAudio = () => {
+    if (currentAudio.current) {
+      currentAudio.current.pause();
+      currentAudio.current.currentTime = 0;
+      currentAudio.current = null;
+    }
+  };
 
   return (
     <div className="mode-page">
@@ -81,7 +105,12 @@ export default function ScenarioPage() {
       <div className="mode-split">
         <button
           className="mode-card mode-card--vocab"
-          onClick={() => navigate(`/scenario/${scenarioId}/vocab-pronunciation`)}
+          onClick={() => {
+            stopAudio();
+            navigate(`/scenario/${scenarioId}/vocab-pronunciation`);
+          }}
+          onMouseEnter={() => playAudio('/audio/vocabulary and pronunciation.wav')}
+          onMouseLeave={stopAudio}
         >
           <div className="mode-illustration">
             <VocabularyIllustration />
@@ -91,7 +120,12 @@ export default function ScenarioPage() {
 
         <button
           className="mode-card mode-card--convo"
-          onClick={() => navigate(`/scenario/${scenarioId}/conversation`)}
+          onClick={() => {
+            stopAudio();
+            navigate(`/scenario/${scenarioId}/conversation`);
+          }}
+          onMouseEnter={() => playAudio('/audio/conversation.wav')}
+          onMouseLeave={stopAudio}
         >
           <div className="mode-illustration">
             <ConversationIllustration />
@@ -100,5 +134,5 @@ export default function ScenarioPage() {
         </button>
       </div>
     </div>
-  )
+  );
 }

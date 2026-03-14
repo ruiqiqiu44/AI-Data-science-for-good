@@ -1,5 +1,8 @@
-import { useNavigate } from 'react-router-dom'
-import './App.css'
+import { useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
+import './App.css';
+import { hasUserInteracted } from './audio';
+
 
 function GroceryIllustration() {
   return (
@@ -121,6 +124,7 @@ const scenarios = [
     bgColor: '#f0fdf4',
     borderColor: '#bbf7d0',
     illustration: <GroceryIllustration />,
+    audioSrc: "/audio/grocery.wav", // Add this line for the grocery scenario
   },
   {
     id: 'pharmacy',
@@ -130,6 +134,7 @@ const scenarios = [
     bgColor: '#eff6ff',
     borderColor: '#bfdbfe',
     illustration: <PharmacyIllustration />,
+    audioSrc: "/audio/pharmacy.wav",
   },
   {
     id: 'transport',
@@ -139,11 +144,13 @@ const scenarios = [
     bgColor: '#fff7ed',
     borderColor: '#fed7aa',
     illustration: <TransportIllustration />,
+    audioSrc: "/audio/transportation.wav", // Add this line for the transport scenario
   },
 ]
 
 function App() {
   const navigate = useNavigate()
+  const currentAudio = useRef<HTMLAudioElement | null>(null);
 
   return (
     <div className="app">
@@ -171,30 +178,76 @@ function App() {
       <header className="app-header">
         <span className="header-icon">🗪</span>
         <h1 className="app-title">Or pick a scenario</h1>
+        <button
+            className="header-audio-btn"
+            onClick={() => {
+            // TODO: Wire up the global instruction audio playback here
+            console.log("Speaker icon clicked: Play scenario instructions");
+            }}
+            aria-label="Listen to instructions"
+            style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '1.2rem', /* Scaled slightly to match the text baseline */
+            padding: 0,
+            margin: 0
+            }}
+        >
+            🔊
+        </button>
       </header>
 
       <div className="scenario-grid">
         {scenarios.map((s) => (
-          <button
+            <button
             key={s.id}
             className="scenario-card"
             style={{
-              '--accent': s.accentColor,
-              '--bg': s.bgColor,
-              '--border': s.borderColor,
+                '--accent': s.accentColor,
+                '--bg': s.bgColor,
+                '--border': s.borderColor,
             } as React.CSSProperties}
-            onClick={() => navigate(`/scenario/${s.id}`)}
-          >
+            onClick={() => {
+                // Stop audio immediately upon navigating
+                if (currentAudio.current) {
+                  currentAudio.current.pause();
+                  currentAudio.current = null;
+                }
+                navigate(`/scenario/${s.id}`);
+            }}
+            onMouseEnter={() => {
+                if (!hasUserInteracted) {
+                  return;
+                }
+                // 1. Stop any audio currently playing from other cards
+                if (currentAudio.current) {
+                  currentAudio.current.pause();
+                  currentAudio.current.currentTime = 0;
+                }
+                // 2. Play the new audio
+                currentAudio.current = new Audio(s.audioSrc); // Make sure s.audioSrc exists in your data
+                currentAudio.current.play().catch(err => console.error("Audio playback failed:", err));
+            }}
+            onMouseLeave={() => {
+                // Stop the audio if the mouse leaves the card
+                if (currentAudio.current) {
+                  currentAudio.current.pause();
+                  currentAudio.current.currentTime = 0;
+                  currentAudio.current = null;
+                }
+            }}
+            >
             <div className="card-top">
-              <span className="card-emoji">{s.emoji}</span>
+                <span className="card-emoji">{s.emoji}</span>
             </div>
             <div className="card-illustration">
-              {s.illustration}
+                {s.illustration}
             </div>
             <div className="card-label">{s.label}</div>
-          </button>
+            </button>
         ))}
-      </div>
+        </div>
 
     </div>
   )

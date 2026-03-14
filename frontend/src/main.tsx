@@ -7,6 +7,9 @@ import ScenarioPage from './ScenarioPage.tsx'
 import VocabPronunciationPage from './VocabPronunciationPage.tsx'
 import ConversationPage from './ConversationPage.tsx'
 import ScanPage from './ScanPage.tsx'
+import { initializeAudioInteraction } from './audio.ts'
+
+initializeAudioInteraction();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
