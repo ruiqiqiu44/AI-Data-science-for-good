@@ -300,14 +300,6 @@ export default function ScanPage() {
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, #1e293b, #334155)',
-          borderRadius: 24, padding: '28px 24px 32px', textAlign: 'center', marginBottom: 20
-        }}>
-          <div style={{ fontSize: 52, marginBottom: 12 }}>📷</div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 6 }}>Take a photo of any sign</div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>Upload a photo — we will explain the words</div>
-        </div>
 
         <input ref={fileInputRef} type="file" accept="image/*"
           style={{ display: 'none' }} onChange={handleFile} />
