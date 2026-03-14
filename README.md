@@ -104,3 +104,7 @@ API runs at `http://localhost:8000`. Interactive docs at `http://localhost:8000/
 | `POST` | `/pronunciation-feedback` | Analyse pronunciation — form fields: `word` (str), `audio` (file) |
 
 > **Note:** The first request to `/pronunciation-feedback` will download the wav2vec2 model (~1 GB) from HuggingFace.
+
+
+### Scan Words from Image
+Upload a photo of a sign, notice, or form — the app extracts words, shows emoji + meaning, and can pronounce them.
