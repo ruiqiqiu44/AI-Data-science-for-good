@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from tts import text_to_speech
 from pronunciation import get_feedback
 from recognition import load_model, audio_bytes_to_numpy, audio_to_phonemes, expected_phonemes, analyse
+from images import get_images
 
 _processor = None
 _model = None
@@ -35,6 +37,15 @@ def tts(text: str):
     audio_file = text_to_speech(text)
     return {"audio_file": audio_file}
 
+@app.get("/images/")
+def images(query: str):
+    """Return the top 4 Unsplash images for a word or phrase.
+
+    Response: list of { url, thumb_url, alt, credit }
+    """
+    return get_images(query)
+
+
 @app.post("/recog/")
 async def recog(audio: UploadFile, target: str = Form(...)):
     '''Return JSON with the full result:
@@ -64,3 +75,4 @@ async def recog(audio: UploadFile, target: str = Form(...)):
         "actual": actual_str,
         **fb.to_dict(),
     }
+
