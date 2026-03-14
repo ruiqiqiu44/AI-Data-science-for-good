@@ -52,7 +52,7 @@ SUBSTITUTION_RULES: dict[tuple[str, str], tuple[str, str, str]] = {
     ("θ", "d"): (
         'TH→D: "think" sounded like "dink"',
         "think / thank / mouth",
-        'Same as above — tongue between teeth, but this time voice it slightly.',
+        'Place your tongue gently between your teeth, but this time voice it slightly.',
     ),
     ("ð", "d"): (
         'TH→D: "they" sounded like "day"',
@@ -62,7 +62,7 @@ SUBSTITUTION_RULES: dict[tuple[str, str], tuple[str, str, str]] = {
     ("ð", "t"): (
         'TH→T: "they" sounded like "tay"',
         "they / the / those",
-        'For the voiced "th", your tongue touches your upper teeth — feel the vibration as air passes.',
+        'Touch your upper teeth with your tongue tip — feel the vibration as air passes.',
     ),
     # V sound
     ("v", "b"): (
@@ -73,24 +73,24 @@ SUBSTITUTION_RULES: dict[tuple[str, str], tuple[str, str, str]] = {
     ("v", "w"): (
         'V→W: "very" sounded like "wery"',
         "very / visit / have",
-        'Teeth touch the lower lip for "v". For "w", lips round — they are different. Try "v-v-v".',
+        'Rest your upper front teeth on your lower lip for "v". For "w", lips round — they are different.',
     ),
     # Vowel length distinction
     ("iː", "ɪ"): (
         'Short I used instead of long EE: "sheep" sounded like "ship"',
         "sheep / beat / feel",
-        'Hold the EE sound longer — like "sheeeep". Stretch it out!',
+        'Hold the e sound longer — like "sheeeep". Stretch it out!',
     ),
     ("ɪ", "iː"): (
         'Long EE used instead of short I: "ship" sounded like "sheep"',
         "ship / bit / fill",
-        'The short "i" is quick — say it and stop right away. Do not hold it.',
+        'The short i is quick — say it and stop right away. Do not hold it.',
     ),
     # English approximant R
     ("ɹ", "r"): (
         'Rolled or flapped R detected',
         "red / river / read",
-        'For English R, your tongue floats in the middle — it does not touch anything. Try "rrr" with a floating tongue.',
+        'Your tongue floats in the middle — it does not touch anything. Try "rrr" with a floating tongue.',
     ),
 }
 
@@ -210,6 +210,8 @@ class Feedback:
         self.high: list[tuple[str, str, str]] = []  # (label, example, tip)
         self.low:  list[str] = []
         self._seen: set[tuple[str, str]] = set()
+        self.mismatch_count = 0
+        self.total_expected = 0
 
     def add_high(self, label: str, example: str, tip: str, key: tuple[str, str]) -> None:
         #critical errors
@@ -224,15 +226,70 @@ class Feedback:
 
     @property
     def score(self) -> int:
-        return max(0, 100 - len(self.high) * 15)
+        # Base score on overall phoneme accuracy
+        if self.total_expected == 0:
+            return 0
+        accuracy = max(0, 100 - (self.mismatch_count * 100 // self.total_expected))
+        # Further penalise high-priority errors specifically if they exist
+        penalty = len(self.high) * 10
+        return max(0, accuracy - penalty)
+
+    def _get_audio_filename(self, tip: str) -> str:
+        """Map a tip string to an audio filename based on its first few words."""
+        t = tip.lower()
+        if t.startswith("place your tongue"): return "place your tongue.wav"
+        if t.startswith("touch your upper"): return "touch your upper.wav"
+        if t.startswith("rest your upper"): return "rest your upper.wav"
+        if t.startswith("hold the e"): return "hold the e.wav"
+        if t.startswith("the short i"): return "the short i.wav"
+        if t.startswith("your tongue floats"): return "your tongue floats.wav"
+        if t.startswith("pronounce the final"): return "pronounce the final.wav"
+        return ""
+
+    @property
+    def human_feedback(self) -> str:
+        """Return a single string summarizing the main feedback for the user."""
+        if self.score > 85:
+            return "Excellent! Your pronunciation is very clear."
+        
+        if self.score < 40:
+            return "That was a bit hard to understand. Try saying it slowly again."
+
+        # Combine labels and tips into a readable paragraph
+        if self.high:
+            parts = []
+            for label, example, tip in self.high:
+                msg = label.split(':')[-1].strip().capitalize()
+                parts.append(f"{msg}. {tip}")
+            return " ".join(parts)
+        
+        return "Not quite there yet. Focus on each sound and try again!"
+
+    @property
+    def feedback_audio(self) -> str:
+        """Return the audio filename for the overall feedback."""
+        if self.score > 85:
+            return "good job.wav"
+        if self.score < 40:
+            return "keep on going.wav"
+        if self.high:
+            return self._get_audio_filename(self.high[0][2])
+        return ""
 
     def to_dict(self) -> dict:
         return {
             "expected": self.expected,
             "actual": self.actual,
             "score": self.score,
+            "feedback": self.human_feedback,
+            "audio": self.feedback_audio,
             "errors": [
-                {"label": label, "examples": example, "tip": tip}
+                {
+                    "label": label, 
+                    "examples": example, 
+                    "tip": tip,
+                    "audio": self._get_audio_filename(tip)
+                }
                 for label, example, tip in self.high
             ],
             "minor_notes": self.low
@@ -244,17 +301,19 @@ def analyse(expected_str: str, actual_str: str) -> Feedback:
     act = _tokenise(actual_str)
     alignment = _align(exp, act)
     fb = Feedback(expected=expected_str, actual=actual_str)
+    fb.total_expected = len(exp)
 
     for i, (e, a) in enumerate(alignment):
-        # ── Substitutions ──────────────────────────────────────────────────
+        # ── Count any mismatch ───────────────────────────────────────────
+        if e != a:
+            fb.mismatch_count += 1
+
+        # ── Substitutions (Pre-defined errors) ──────────────────────────
         if e is not None and a is not None and e != a:
             key = (e, a)
             if key in SUBSTITUTION_RULES:
                 label, example, tip = SUBSTITUTION_RULES[key]
                 fb.add_high(label, example, tip, key)
-            # Unlisted substitution into a low-priority bucket
-            #elif e in LOW_PRIORITY_PHONEMES:
-                #fb.add_low(f'/{e}/ sounded like /{a}/ — minor accent, still understood.')
 
         # ── Final consonant dropped ────────────────────────────────────────
         if e is not None and a is None:
@@ -264,7 +323,7 @@ def analyse(expected_str: str, actual_str: str) -> Feedback:
                 fb.add_high(
                     f'Ending /{e}/ sound seems dropped',
                     f'words ending in /{e}/ like "back", "bus", "stop"',
-                    f'Finish the word clearly — make your mouth land in the /{e}/ position.',
+                    f'Pronounce the final consonant clearly — make your mouth land in the /{e}/ position.',
                     ("_final_", e),
                 )
 

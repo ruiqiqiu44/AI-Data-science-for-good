@@ -1,9 +1,11 @@
 import io
+import os
 import torchaudio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from tts import text_to_speech
 from pronunciation import get_feedback
 from recognition import load_model, audio_to_phonemes, expected_phonemes, analyse
@@ -28,6 +30,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve audio files for pronunciation feedback tips
+audio_dir = os.path.join(os.path.dirname(__file__), "audio")
+if os.path.exists(audio_dir):
+    app.mount("/audio", StaticFiles(directory=audio_dir), name="audio")
 
 @app.get("/")
 def read_root():
@@ -56,7 +63,9 @@ async def recog(audio: UploadFile, target: str = Form(...)):
   "expected":    "θ ɹ iː",
   "actual":      "t ɹ iː",
   "score":       85,
-  "errors":      [{ "label": "TH→T: ...", "examples": "...", "tip": "..." }],
+  "feedback":    "...",
+  "audio":       "good job.wav",
+  "errors":      [{ "label": "TH→T: ...", "examples": "...", "tip": "...", "audio": "..." }],
   "minor_notes": []
 }'''
     data = await audio.read()
@@ -82,4 +91,3 @@ async def recog(audio: UploadFile, target: str = Form(...)):
     fb = analyse(ref_str, actual_str)
 
     return fb.to_dict()
-

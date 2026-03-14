@@ -4,20 +4,23 @@ import './VocabPronunciationPage.css'
 import { BACKEND_URL } from './config'
 
 // ---------------------------------------------------------------------------
-// API call — receives the target word and the recorded attempt, returns feedback
+// Types for IPA Feedback
 // ---------------------------------------------------------------------------
-async function getPronunciationFeedback(word: string, audio: Blob, fileName: string): Promise<void> {
-  const body = new FormData()
-  body.append('target', word)
-  body.append('audio', audio, fileName)
+interface IPAError {
+  label: string;
+  examples: string;
+  tip: string;
+  audio: string;
+}
 
-  const response = await fetch(`${BACKEND_URL}/recog/`, {
-    method: 'POST',
-    body,
-  })
-
-  const feedback = await response.json()
-  console.log('Pronunciation feedback:', feedback)
+interface IPAFeedback {
+  expected: string;
+  actual: string;
+  score: number;
+  feedback: string;
+  audio: string;
+  errors: IPAError[];
+  minor_notes: string[];
 }
 // ---------------------------------------------------------------------------
 
@@ -42,7 +45,7 @@ function speakWord(word: string) {
 const VOCAB_WORDS: Record<string, string[]> = {
   grocery:  ['Apple', 'Milk', 'Bread', 'Shopping Cart', 'Checkout'],
   pharmacy: ['Medicine', 'Doctor', 'Prescription', 'Bandage'],
-  transport: ['Bus', 'Ticket', 'Bus Stop', 'Train Station'],
+  transport: ['Bus', 'Ticket', 'Bus Stop', 'Train Station', 'Think'],
 }
 // ---------------------------------------------------------------------------
 
@@ -53,6 +56,7 @@ export default function VocabPronunciationPage() {
   const [recording, setRecording] = useState(false)
   const [images, setImages] = useState<string[]>([])
   const [imagesLoading, setImagesLoading] = useState(false)
+  const [feedback, setFeedback] = useState<IPAFeedback | null>(null)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
@@ -60,10 +64,41 @@ export default function VocabPronunciationPage() {
   const words = VOCAB_WORDS[scenarioId ?? ''] ?? []
   const currentWord = words[index]
 
+  // ---------------------------------------------------------------------------
+  // API call — receives the target word and the recorded attempt, returns feedback
+  // ---------------------------------------------------------------------------
+  async function getPronunciationFeedback(word: string, audio: Blob, fileName: string): Promise<void> {
+    const body = new FormData()
+    body.append('target', word)
+    body.append('audio', audio, fileName)
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/recog/`, {
+        method: 'POST',
+        body,
+      })
+
+      const data: IPAFeedback = await response.json()
+      console.log('Pronunciation feedback:', data)
+      setFeedback(data)
+
+      // Play the audio feedback message if available
+      if (data.audio) {
+        const audioUrl = `${BACKEND_URL}/audio/${encodeURIComponent(data.audio)}`
+        const audioObj = new Audio(audioUrl)
+        audioObj.play().catch(err => console.error("Feedback audio playback failed:", err))
+      }
+    } catch (err) {
+      console.error("Error fetching pronunciation feedback:", err)
+    }
+  }
+  // ---------------------------------------------------------------------------
+
   useEffect(() => {
     if (!currentWord) return
     setImagesLoading(true)
     setImages([])
+    setFeedback(null) // Clear feedback when word changes
     fetchImages(currentWord)
       .then(setImages)
       .finally(() => setImagesLoading(false))
@@ -125,6 +160,7 @@ export default function VocabPronunciationPage() {
               {recording ? '⏹' : '🎙'}
             </button>
           </div>
+
 
           <div className="vocab-image-grid">
             {imagesLoading
