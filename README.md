@@ -1,6 +1,6 @@
 # AI and Data Science for Good
 
-An English Pronunciation Coach designed for Rohingya learners, featuring phoneme-level analysis, interactive scenarios, and visual learning aids.
+An Oral-First English Pronunciation Coach designed for Rohingya refugees resettled in Canada. Many of these learners face barriers with conventional language apps due to low native-language literacy rates and a lack of Rohingya support on common translation platforms. To solve this, our application bypasses text entirely, featuring real-time phoneme-level analysis, interactive audio scenarios, and visual learning aids. 
 
 ## Features
 
